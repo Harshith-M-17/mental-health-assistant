@@ -7,7 +7,11 @@ type Message = {
 }
 
 // Simple keyword-based response matching
-export function getResponseForMessage(message: string, conversationHistory: Message[]): string {
+export function getResponseForMessage(
+  message: string,
+  conversationHistory: Message[],
+  currentEmotion: string | null = null
+): string {
   const lowercaseMessage = message.toLowerCase()
 
   // Check for crisis keywords first
@@ -16,6 +20,20 @@ export function getResponseForMessage(message: string, conversationHistory: Mess
     if (lowercaseMessage.includes(keyword)) {
       return predefinedResponses.crisis
     }
+  }
+
+  // If emotion is detected and message is short, prioritize emotion-based response
+  if (currentEmotion && message.length < 50) {
+    const emotionResponses: Record<string, string> = {
+      happy: "I'm glad you're feeling happy! Would you like to talk about what's making you feel good?",
+      sad: "I notice you seem sad. I'm here to listen if you'd like to talk about what's troubling you.",
+      angry: "I notice you appear to be angry. Would you like to talk about what's causing these feelings?",
+      fearful: "I notice you seem anxious or fearful. Remember to take deep breaths. Would you like to discuss what's causing these feelings?",
+      disgusted: "I notice you seem uncomfortable. Would you like to talk about what's bothering you?",
+      surprised: "I notice you seem surprised. Is there something unexpected that happened?",
+      neutral: "I'm here to listen and support you. How are you feeling today?",
+    }
+    return emotionResponses[currentEmotion] || predefinedResponses.default
   }
 
   // Check for greetings
